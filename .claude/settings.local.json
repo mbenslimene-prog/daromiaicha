@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(taskkill /PID 2704 /F)",
+      "Bash(cmd.exe /c \"taskkill /PID 2704 /F\")",
+      "Bash(cmd.exe:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node -e ':*)",
+      "Bash(node -e \"console.log\\(require\\('react-day-picker/package.json'\\).version\\)\")"
+    ]
+  }
+}

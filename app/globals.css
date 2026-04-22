@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-azure: #0077b6;
+  --color-azure-dark: #005f92;
+  --color-sand: #f4ebd0;
+  --color-rock: #4a4e69;
+  --color-gold: #d4af37;
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Playfair Display", serif;
+}
+
+:root {
+  --background: #f9f9f7;
+  --foreground: #1a1a2e;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hero-zoom {
+  animation: zoomIn 20s infinite alternate;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+
+/* Calendrier – surcharge react-day-picker v9 */
+
+/* Jours sélectionnés */
+.rdp-selected .rdp-day_button {
+  background-color: #0077b6 !important;
+  border-color: #0077b6 !important;
+  color: white !important;
+}
+
+/* Plage intermédiaire */
+.rdp-range_middle {
+  background-color: #bde0f7 !important;
+}
+.rdp-range_middle .rdp-day_button {
+  color: #003d5c !important;
+}
+
+/* Dates passées — estompées */
+.rdp-disabled:not(.day-booked) {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Dates réservées — fond gris clair + chiffre gris foncé barré */
+.rdp-disabled.day-booked {
+  opacity: 1 !important;
+  pointer-events: none;
+}
+.rdp-disabled.day-booked .rdp-day_button {
+  background-color: #e0e0e0 !important;
+  color: #555 !important;
+  text-decoration: line-through !important;
+  text-decoration-color: #555 !important;
+  cursor: not-allowed !important;
+}
