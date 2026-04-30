@@ -6,6 +6,8 @@ import { fr } from "date-fns/locale"
 import { differenceInCalendarDays, format, addDays } from "date-fns"
 import { ArrowRight, Star, X } from "lucide-react"
 import type { Property } from "@/lib/types"
+import type { PriceRule } from "@/lib/pricing"
+import { getPriceForDate, calculateTotalWithRules } from "@/lib/pricing"
 import { calculateTotal, countNightTypes } from "@/lib/utils"
 import PaymentForm from "@/components/PaymentForm"
 import "react-day-picker/dist/style.css"
@@ -13,12 +15,13 @@ import "react-day-picker/dist/style.css"
 interface Props {
   property: Property
   blockedDates?: Date[]
-  propertyDbId?: string   // UUID Supabase — passé depuis la page serveur
+  propertyDbId?: string
+  priceRules?: PriceRule[]
 }
 
 type Step = "booking" | "payment"
 
-export default function BookingWidget({ property, blockedDates = [], propertyDbId }: Props) {
+export default function BookingWidget({ property, blockedDates = [], propertyDbId, priceRules = [] }: Props) {
   const [step, setStep] = useState<Step>("booking")
   const [range, setRange] = useState<DateRange | undefined>()
   const [guestName, setGuestName] = useState("")
@@ -43,9 +46,10 @@ export default function BookingWidget({ property, blockedDates = [], propertyDbI
 
   const totalCalc =
     range?.from && range?.to && nights > 0
-      ? calculateTotal(
+      ? calculateTotalWithRules(
           format(range.from, "yyyy-MM-dd"),
           format(range.to, "yyyy-MM-dd"),
+          priceRules,
           property.price_per_night_weekday,
           property.price_per_night_weekend
         )
@@ -68,11 +72,12 @@ export default function BookingWidget({ property, blockedDates = [], propertyDbI
 
   const DayButtonWithPrice = useCallback(
     ({ day, modifiers, ...buttonProps }: DayButtonProps) => {
-      const dow = day.date.getDay()
-      const isWeekend = dow === 5 || dow === 6
-      const price = isWeekend
-        ? property.price_per_night_weekend
-        : property.price_per_night_weekday
+      const price = getPriceForDate(
+        day.date,
+        priceRules,
+        property.price_per_night_weekday,
+        property.price_per_night_weekend
+      )
       const showPrice = !modifiers.disabled && !modifiers.booked
 
       return (
@@ -92,7 +97,7 @@ export default function BookingWidget({ property, blockedDates = [], propertyDbI
         </button>
       )
     },
-    [property.price_per_night_weekday, property.price_per_night_weekend]
+    [property.price_per_night_weekday, property.price_per_night_weekend, priceRules]
   )
 
   async function handleContinue(e: React.FormEvent) {

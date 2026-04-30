@@ -7,6 +7,7 @@ import PhotoGallery from "@/components/PhotoGallery"
 import { PROPERTIES } from "@/lib/properties"
 import { createServiceClient } from "@/lib/supabase"
 import { syncPropertyIcalWithTimeout } from "@/lib/ical-sync"
+import type { PriceRule } from "@/lib/pricing"
 import { Users, BedDouble, Bath, MapPin, CheckCircle, Maximize2, Star } from "lucide-react"
 
 export async function generateStaticParams() {
@@ -16,6 +17,7 @@ export async function generateStaticParams() {
 interface PropertyDbData {
   dbId: string | null
   blockedDates: Date[]
+  priceRules: PriceRule[]
 }
 
 async function getPropertyDbData(propertySlug: string): Promise<PropertyDbData> {
@@ -28,14 +30,14 @@ async function getPropertyDbData(propertySlug: string): Promise<PropertyDbData> 
       .eq("slug", propertySlug)
       .single()
 
-    if (!dbProperty) return { dbId: null, blockedDates: [] }
+    if (!dbProperty) return { dbId: null, blockedDates: [], priceRules: [] }
 
-    // Sync iCal avant de lire les dates — timeout 2.5s (marge Netlify 10s)
     await syncPropertyIcalWithTimeout(dbProperty.id, 2500)
 
-    const [{ data: blockedRanges }, { data: confirmedBookings }] = await Promise.all([
+    const [{ data: blockedRanges }, { data: confirmedBookings }, { data: priceRulesData }] = await Promise.all([
       db.from("blocked_dates").select("start_date, end_date").eq("property_id", dbProperty.id),
       db.from("bookings").select("check_in, check_out").eq("property_id", dbProperty.id).eq("status", "confirmed"),
+      db.from("price_rules").select("*").eq("property_id", dbProperty.id).order("start_date"),
     ])
 
     const dates: Date[] = []
@@ -49,9 +51,9 @@ async function getPropertyDbData(propertySlug: string): Promise<PropertyDbData> 
         .forEach((d) => dates.push(d))
     }
 
-    return { dbId: dbProperty.id, blockedDates: dates }
+    return { dbId: dbProperty.id, blockedDates: dates, priceRules: (priceRulesData ?? []) as PriceRule[] }
   } catch {
-    return { dbId: null, blockedDates: [] }
+    return { dbId: null, blockedDates: [], priceRules: [] }
   }
 }
 
@@ -64,7 +66,7 @@ export default async function PropertyPage({
   const property = PROPERTIES.find((p) => p.slug === slug)
   if (!property) notFound()
 
-  const { dbId, blockedDates } = await getPropertyDbData(property.slug)
+  const { dbId, blockedDates, priceRules } = await getPropertyDbData(property.slug)
 
   return (
     <>
@@ -164,6 +166,7 @@ export default async function PropertyPage({
               property={property}
               blockedDates={blockedDates}
               propertyDbId={dbId ?? undefined}
+              priceRules={priceRules}
             />
           </div>
         </div>

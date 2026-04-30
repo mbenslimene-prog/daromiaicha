@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Waves, LayoutDashboard, Home, Calendar, RefreshCw, LogOut } from "lucide-react"
+import { Waves, LayoutDashboard, Home, Calendar, RefreshCw, LogOut, Tag } from "lucide-react"
 import type { Property, Booking } from "@/lib/types"
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -78,6 +78,16 @@ export default function AdminDashboard({
             </button>
           ))}
         </nav>
+
+        <div className="px-4 pb-2">
+          <Link
+            href="/admin/tarifs"
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition"
+          >
+            <Tag size={16} className="text-[#0077b6]" />
+            Gestion des tarifs
+          </Link>
+        </div>
 
         <div className="px-4 pb-6 space-y-2">
           <button

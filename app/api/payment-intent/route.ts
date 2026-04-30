@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
 import { createServiceClient } from "@/lib/supabase"
 import { PROPERTIES } from "@/lib/properties"
-import { calculateTotal } from "@/lib/utils"
+import { calculateTotalWithRules } from "@/lib/pricing"
 import type { CheckoutPayload } from "@/lib/types"
 import type { Property } from "@/lib/types"
 
@@ -85,7 +85,20 @@ export async function POST(request: NextRequest) {
     }
     const { dbId, property } = resolved
 
-    const total = calculateTotal(check_in, check_out, property.price_per_night_weekday, property.price_per_night_weekend)
+    const { data: priceRulesData } = await db
+      .from("price_rules")
+      .select("*")
+      .eq("property_id", dbId)
+      .lte("start_date", check_out)
+      .gte("end_date", check_in)
+
+    const total = calculateTotalWithRules(
+      check_in,
+      check_out,
+      (priceRulesData ?? []) as import("@/lib/pricing").PriceRule[],
+      property.price_per_night_weekday,
+      property.price_per_night_weekend
+    )
     const deposit = Math.round(total / 2)
 
     const { data: booking, error: dbError } = await db
