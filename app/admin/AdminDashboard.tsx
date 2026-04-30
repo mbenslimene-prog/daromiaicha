@@ -77,17 +77,13 @@ export default function AdminDashboard({
               <Icon size={16} /> {label}
             </button>
           ))}
-        </nav>
-
-        <div className="px-4 pb-2">
           <Link
             href="/admin/tarifs"
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-white/70 hover:bg-white/10 transition"
           >
-            <Tag size={16} className="text-[#0077b6]" />
-            Gestion des tarifs
+            <Tag size={16} /> Gestion des tarifs
           </Link>
-        </div>
+        </nav>
 
         <div className="px-4 pb-6 space-y-2">
           <button

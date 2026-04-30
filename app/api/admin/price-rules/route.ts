@@ -41,6 +41,23 @@ export async function POST(request: NextRequest) {
   }
 
   const db = createServiceClient()
+
+  // Vérifier chevauchement avec règles existantes sur ce bien
+  const { data: overlapping } = await db
+    .from("price_rules")
+    .select("id, label, start_date, end_date")
+    .eq("property_id", property_id)
+    .lt("start_date", end_date)
+    .gt("end_date", start_date)
+
+  if (overlapping?.length) {
+    const r = overlapping[0]
+    return NextResponse.json(
+      { error: `Chevauchement avec la règle "${r.label}" (${r.start_date} → ${r.end_date}).` },
+      { status: 409 }
+    )
+  }
+
   const { data, error } = await db
     .from("price_rules")
     .insert({ property_id, label: label || "Tarif spécial", start_date, end_date, price_weekday, price_weekend })
@@ -74,6 +91,28 @@ export async function PUT(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id manquant." }, { status: 400 })
 
   const db = createServiceClient()
+
+  // Récupérer le property_id de la règle existante
+  const { data: existing } = await db.from("price_rules").select("property_id").eq("id", id).single()
+  if (!existing) return NextResponse.json({ error: "Règle introuvable." }, { status: 404 })
+
+  // Vérifier chevauchement en excluant la règle elle-même
+  const { data: overlapping } = await db
+    .from("price_rules")
+    .select("id, label, start_date, end_date")
+    .eq("property_id", existing.property_id)
+    .neq("id", id)
+    .lt("start_date", end_date)
+    .gt("end_date", start_date)
+
+  if (overlapping?.length) {
+    const r = overlapping[0]
+    return NextResponse.json(
+      { error: `Chevauchement avec la règle "${r.label}" (${r.start_date} → ${r.end_date}).` },
+      { status: 409 }
+    )
+  }
+
   const { data, error } = await db
     .from("price_rules")
     .update({ label, start_date, end_date, price_weekday, price_weekend })
