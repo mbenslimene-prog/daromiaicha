@@ -8,7 +8,7 @@ import { PROPERTIES } from "@/lib/properties"
 export default function HomePage() {
   return (
     <>
-      <Navbar />
+      <Navbar transparent />
 
       {/* Hero */}
       <section id="accueil" className="relative h-screen flex items-center justify-center overflow-hidden">
