@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Trash2, Pencil, X, Check } from "lucide-react"
+import { Plus, Trash2, Pencil, X, Check, Copy } from "lucide-react"
 import type { Property } from "@/lib/types"
 import type { PriceRule } from "@/lib/pricing"
 
@@ -27,6 +27,7 @@ export default function PricingManager({ properties, initialRules }: Props) {
   const [editForm, setEditForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [applyMsg, setApplyMsg] = useState("")
 
   const filteredRules = selectedDbId
     ? rules.filter((r) => r.property_id === selectedDbId)
@@ -103,6 +104,30 @@ export default function PricingManager({ properties, initialRules }: Props) {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleApplyAll(rule: PriceRule) {
+    if (!confirm(`Appliquer "${rule.label}" à tous les autres logements ?\nLes biens avec chevauchement seront ignorés.`)) return
+    setApplyMsg("")
+    const res = await fetch("/api/admin/price-rules/apply-all", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        source_property_id: rule.property_id,
+        label: rule.label,
+        start_date: rule.start_date,
+        end_date: rule.end_date,
+        price_weekday: rule.price_weekday,
+        price_weekend: rule.price_weekend,
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) { setApplyMsg(`Erreur : ${data.error}`); return }
+
+    const msgs: string[] = []
+    if (data.created.length) msgs.push(`✓ Appliqué à : ${data.created.join(", ")}`)
+    if (data.skipped.length) msgs.push(`⚠ Ignoré : ${data.skipped.map((s: { title: string; reason: string }) => `${s.title} (${s.reason})`).join(" | ")}`)
+    setApplyMsg(msgs.join(" — ") || "Aucun autre logement.")
   }
 
   function startEdit(rule: PriceRule) {
@@ -323,6 +348,15 @@ export default function PricingManager({ properties, initialRules }: Props) {
                           <td className="px-6 py-4 text-right font-semibold text-[#4a4e69]">{rule.price_weekend}€</td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex justify-end gap-2">
+                              {properties.length > 1 && (
+                                <button
+                                  onClick={() => handleApplyAll(rule)}
+                                  className="p-1.5 rounded hover:bg-green-50 text-green-600 transition"
+                                  title="Appliquer à tous les logements"
+                                >
+                                  <Copy size={14} />
+                                </button>
+                              )}
                               <button
                                 onClick={() => startEdit(rule)}
                                 className="p-1.5 rounded hover:bg-blue-50 text-[#0077b6] transition"
@@ -347,6 +381,13 @@ export default function PricingManager({ properties, initialRules }: Props) {
             </table>
           )}
         </div>
+
+        {applyMsg && (
+          <div className="mt-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-800">
+            {applyMsg}
+            <button onClick={() => setApplyMsg("")} className="ml-3 text-blue-400 hover:text-blue-600">✕</button>
+          </div>
+        )}
       </div>
     </div>
   )
