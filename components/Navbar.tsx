@@ -1,15 +1,26 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Menu, X } from "lucide-react"
 import Image from "next/image"
 
 export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener("scroll", onScroll)
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
   return (
-    <header className="fixed w-full top-0 z-50 bg-[#4a4e69] shadow-md">
+    <header
+      className={`fixed w-full top-0 z-50 transition-all duration-300 glass-nav border-b border-gray-100 ${
+        scrolled ? "shadow-sm" : ""
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -20,7 +31,7 @@ export default function Navbar() {
             height={44}
             className="rounded-full object-cover"
           />
-          <span className="font-serif text-2xl font-bold text-white">
+          <span className="font-serif text-2xl font-bold text-[#4a4e69]">
             Dar Omi Aicha
           </span>
         </Link>
@@ -36,7 +47,7 @@ export default function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="text-white/90 hover:text-white transition"
+              className="text-gray-600 hover:text-[#0077b6] transition"
             >
               {link.label}
             </a>
@@ -55,7 +66,7 @@ export default function Navbar() {
 
         {/* Mobile burger */}
         <button
-          className="md:hidden text-white"
+          className="md:hidden text-[#4a4e69]"
           onClick={() => setOpen(!open)}
         >
           {open ? <X size={24} /> : <Menu size={24} />}
