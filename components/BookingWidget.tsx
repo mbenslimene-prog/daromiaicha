@@ -83,17 +83,23 @@ export default function BookingWidget({ property, blockedDates = [], propertyDbI
       return (
         <button
           {...buttonProps}
-          className={[
-            buttonProps.className,
-            "flex flex-col items-center justify-center w-full h-14 gap-0",
-          ].join(" ")}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            height: "52px",
+            padding: "2px 0",
+            gap: 0,
+          }}
         >
-          <span className="text-sm font-medium leading-tight">{day.date.getDate()}</span>
-          {showPrice ? (
-            <span className="text-[10px] text-gray-400 leading-tight">{price}€</span>
-          ) : (
-            <span className="text-[10px] leading-tight opacity-0">–</span>
-          )}
+          <span style={{ fontSize: "13px", fontWeight: 500, lineHeight: 1.2 }}>
+            {day.date.getDate()}
+          </span>
+          <span style={{ fontSize: "10px", lineHeight: 1.2, color: showPrice ? "#9ca3af" : "transparent" }}>
+            {price}€
+          </span>
         </button>
       )
     },
@@ -238,22 +244,31 @@ export default function BookingWidget({ property, blockedDates = [], propertyDbI
         {/* Résumé prix */}
         {nights > 0 && nightTypes && (
           <div className="bg-[#f4ebd0]/60 rounded-xl p-4 text-sm space-y-1.5">
-            {nightTypes.weekday > 0 && (
+            {priceRules.length === 0 ? (
+              <>
+                {nightTypes.weekday > 0 && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>
+                      {property.price_per_night_weekday}€ × {nightTypes.weekday} nuit
+                      {nightTypes.weekday > 1 ? "s" : ""} semaine
+                    </span>
+                    <span>{property.price_per_night_weekday * nightTypes.weekday}€</span>
+                  </div>
+                )}
+                {nightTypes.weekend > 0 && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>
+                      {property.price_per_night_weekend}€ × {nightTypes.weekend} nuit
+                      {nightTypes.weekend > 1 ? "s" : ""} week-end
+                    </span>
+                    <span>{property.price_per_night_weekend * nightTypes.weekend}€</span>
+                  </div>
+                )}
+              </>
+            ) : (
               <div className="flex justify-between text-gray-600">
-                <span>
-                  {property.price_per_night_weekday}€ × {nightTypes.weekday} nuit
-                  {nightTypes.weekday > 1 ? "s" : ""} semaine
-                </span>
-                <span>{property.price_per_night_weekday * nightTypes.weekday}€</span>
-              </div>
-            )}
-            {nightTypes.weekend > 0 && (
-              <div className="flex justify-between text-gray-600">
-                <span>
-                  {property.price_per_night_weekend}€ × {nightTypes.weekend} nuit
-                  {nightTypes.weekend > 1 ? "s" : ""} week-end
-                </span>
-                <span>{property.price_per_night_weekend * nightTypes.weekend}€</span>
+                <span>{nights} nuit{nights > 1 ? "s" : ""}</span>
+                <span>{totalCalc}€</span>
               </div>
             )}
             <div className="flex justify-between font-bold text-[#4a4e69] border-t border-[#d4af37]/30 pt-2 mt-1">

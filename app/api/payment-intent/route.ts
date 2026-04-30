@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
 import { createServiceClient } from "@/lib/supabase"
 import { PROPERTIES } from "@/lib/properties"
-import { calculateTotalWithRules } from "@/lib/pricing"
-import type { CheckoutPayload } from "@/lib/types"
-import type { Property } from "@/lib/types"
+import { calculateTotalWithRules, type PriceRule } from "@/lib/pricing"
+import type { CheckoutPayload, Property } from "@/lib/types"
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
@@ -95,7 +94,7 @@ export async function POST(request: NextRequest) {
     const total = calculateTotalWithRules(
       check_in,
       check_out,
-      (priceRulesData ?? []) as import("@/lib/pricing").PriceRule[],
+      (priceRulesData ?? []) as PriceRule[],
       property.price_per_night_weekday,
       property.price_per_night_weekend
     )

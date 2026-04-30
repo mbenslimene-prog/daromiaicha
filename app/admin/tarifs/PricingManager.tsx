@@ -183,6 +183,7 @@ export default function PricingManager({ properties, initialRules }: Props) {
                   type="date"
                   required
                   value={form.end_date}
+                  min={form.start_date ? (() => { const d = new Date(form.start_date); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10) })() : ""}
                   onChange={(e) => setForm({ ...form, end_date: e.target.value })}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]/30"
                 />
@@ -277,6 +278,7 @@ export default function PricingManager({ properties, initialRules }: Props) {
                               type="date"
                               required
                               value={editForm.end_date}
+                              min={editForm.start_date ? (() => { const d = new Date(editForm.start_date); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10) })() : ""}
                               onChange={(e) => setEditForm({ ...editForm, end_date: e.target.value })}
                               className="border border-gray-200 rounded px-2 py-1 text-sm"
                             />
