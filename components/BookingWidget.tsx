@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { DayPicker, DateRange } from "react-day-picker"
+import { useState, useCallback } from "react"
+import { DayPicker, DateRange, type DayButtonProps } from "react-day-picker"
 import { fr } from "date-fns/locale"
 import { differenceInCalendarDays, format, addDays } from "date-fns"
 import { ArrowRight, Star, X } from "lucide-react"
@@ -65,6 +65,35 @@ export default function BookingWidget({ property, blockedDates = [], propertyDbI
     { before: addDays(new Date(), 1) },
     ...blockedDates,
   ]
+
+  const DayButtonWithPrice = useCallback(
+    ({ day, modifiers, ...buttonProps }: DayButtonProps) => {
+      const dow = day.date.getDay()
+      const isWeekend = dow === 5 || dow === 6
+      const price = isWeekend
+        ? property.price_per_night_weekend
+        : property.price_per_night_weekday
+      const showPrice = !modifiers.disabled && !modifiers.booked
+
+      return (
+        <button
+          {...buttonProps}
+          className={[
+            buttonProps.className,
+            "flex flex-col items-center justify-center w-full h-14 gap-0",
+          ].join(" ")}
+        >
+          <span className="text-sm font-medium leading-tight">{day.date.getDate()}</span>
+          {showPrice ? (
+            <span className="text-[10px] text-gray-400 leading-tight">{price}€</span>
+          ) : (
+            <span className="text-[10px] leading-tight opacity-0">–</span>
+          )}
+        </button>
+      )
+    },
+    [property.price_per_night_weekday, property.price_per_night_weekend]
+  )
 
   async function handleContinue(e: React.FormEvent) {
     e.preventDefault()
@@ -196,6 +225,7 @@ export default function BookingWidget({ property, blockedDates = [], propertyDbI
               numberOfMonths={1}
               className="p-2 text-sm"
               classNames={{ today: "text-[#0077b6] font-bold" }}
+              components={{ DayButton: DayButtonWithPrice }}
             />
           </div>
         </div>
