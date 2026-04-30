@@ -7,6 +7,8 @@ import type { CheckoutPayload } from "@/lib/types"
 import type { Property } from "@/lib/types"
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /**
  * Résout property_id + property_slug en { dbId, property } :
@@ -54,6 +56,27 @@ export async function POST(request: NextRequest) {
     if (!property_id || !check_in || !check_out || !nights || !guest_name || !guest_email) {
       return NextResponse.json({ error: "Données manquantes." }, { status: 400 })
     }
+    if (!DATE_REGEX.test(check_in) || !DATE_REGEX.test(check_out)) {
+      return NextResponse.json({ error: "Format de date invalide." }, { status: 400 })
+    }
+    if (!EMAIL_REGEX.test(guest_email)) {
+      return NextResponse.json({ error: "Email invalide." }, { status: 400 })
+    }
+    if (typeof nights !== "number" || !Number.isInteger(nights) || nights < 1 || nights > 90) {
+      return NextResponse.json({ error: "Durée du séjour invalide (1-90 nuits)." }, { status: 400 })
+    }
+    if (typeof guest_name !== "string" || guest_name.trim().length < 2 || guest_name.length > 100) {
+      return NextResponse.json({ error: "Nom invalide." }, { status: 400 })
+    }
+    const checkInDate = new Date(check_in)
+    const checkOutDate = new Date(check_out)
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    if (checkInDate < today) {
+      return NextResponse.json({ error: "La date d'arrivée ne peut pas être dans le passé." }, { status: 400 })
+    }
+    if (checkOutDate <= checkInDate) {
+      return NextResponse.json({ error: "La date de départ doit être après la date d'arrivée." }, { status: 400 })
+    }
 
     const db = createServiceClient()
     const resolved = await resolveProperty(property_id, db, property_slug)
@@ -84,8 +107,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (dbError) {
-      console.error("Supabase insert error:", dbError)
-      return NextResponse.json({ error: "Impossible de créer la réservation." }, { status: 500 })
+      console.error("[payment-intent] Supabase insert error:", dbError)
+      return NextResponse.json({ error: "Impossible de créer la réservation (base de données)." }, { status: 500 })
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -114,7 +137,7 @@ export async function POST(request: NextRequest) {
       total,
     })
   } catch (err) {
-    console.error("PaymentIntent error:", err)
-    return NextResponse.json({ error: "Erreur interne du serveur." }, { status: 500 })
+    console.error("[payment-intent] Erreur inattendue:", err)
+    return NextResponse.json({ error: "Erreur interne du serveur. Veuillez réessayer." }, { status: 500 })
   }
 }

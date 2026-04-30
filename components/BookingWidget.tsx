@@ -72,8 +72,17 @@ export default function BookingWidget({ property, blockedDates = [], propertyDbI
       setError("Veuillez sélectionner vos dates de séjour.")
       return
     }
+    if (nights > 90) {
+      setError("La durée maximale de séjour est de 90 nuits.")
+      return
+    }
     if (!guestName || !guestEmail) {
       setError("Veuillez renseigner votre nom et email.")
+      return
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(guestEmail)) {
+      setError("Veuillez saisir un email valide.")
       return
     }
     setError("")

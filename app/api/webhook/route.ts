@@ -33,12 +33,16 @@ async function confirmBooking(
     console.error("[webhook] booking introuvable:", bookingId)
     return
   }
+  if (current.status === "confirmed") {
+    console.log("[webhook] booking déjà confirmé (idempotent) — rien à faire:", bookingId)
+    return
+  }
   if (current.status === "cancelled") {
     console.log("[webhook] booking déjà annulé — on ne reconfirme pas:", bookingId)
     return
   }
 
-  // Résoudre le bien pour les emails
+  // Résoudre le bien pour les emails + valider que le slug metadata correspond au booking
   let property: Property | undefined = propertySlug
     ? PROPERTIES.find((p) => p.slug === propertySlug)
     : undefined
@@ -46,6 +50,15 @@ async function confirmBooking(
     const { data: dbProp } = await db
       .from("properties").select("slug").eq("id", current.property_id).single()
     if (dbProp) property = PROPERTIES.find((p) => p.slug === dbProp.slug)
+  }
+  // Vérification anti-falsification : le slug metadata doit correspondre au bien en base
+  if (propertySlug && property) {
+    const { data: dbProp } = await db
+      .from("properties").select("id").eq("slug", propertySlug).single()
+    if (dbProp && dbProp.id !== current.property_id) {
+      console.error("[webhook] metadata property_slug ne correspond pas au booking — abandon:", bookingId)
+      return
+    }
   }
 
   // 2a. Vérifier qu'aucune autre réservation confirmée (site direct) ne chevauche ces dates
@@ -81,14 +94,20 @@ async function confirmBooking(
     return
   }
 
-  // 3. Confirmer la réservation
-  const { error: updateError } = await db
+  // 3. Confirmer la réservation — optimistic lock : n'écrit que si status est encore "pending"
+  const { data: updated, error: updateError } = await db
     .from("bookings")
     .update({ status: "confirmed", stripe_payment_intent_id: paymentIntentId })
     .eq("id", bookingId)
+    .eq("status", "pending")
+    .select()
 
   if (updateError) {
     console.error("[webhook] update error:", updateError)
+    return
+  }
+  if (!updated?.length) {
+    console.log("[webhook] booking déjà traité par un autre processus — abandon:", bookingId)
     return
   }
   console.log("[webhook] statut → confirmed ✓")

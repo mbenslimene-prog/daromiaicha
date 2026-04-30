@@ -30,7 +30,10 @@ async function send(to: string, subject: string, html: string) {
     return
   }
   try {
-    await resend.emails.send({ from: fromEmail, to, subject, html })
+    const result = await resend.emails.send({ from: fromEmail, to, subject, html })
+    if (!result.data?.id) {
+      console.error("[email] Resend n'a pas retourné d'ID — probable erreur domaine ou clé:", result.error)
+    }
   } catch (err) {
     console.error("[email] Échec d'envoi :", err)
   }
@@ -76,15 +79,15 @@ export async function sendBookingConfirmation(
 // ── Email 2 : Annulation (conflit détecté à la confirmation) ─────────────────
 
 export async function sendCancellationNotification(
-  booking: Record<string, unknown>,
+  booking: Pick<Booking, "guest_name" | "guest_email" | "check_in" | "check_out" | "nights">,
   property: Property,
   source: "direct" | "external"
 ): Promise<void> {
-  const guestName   = booking.guest_name   as string
-  const guestEmail  = booking.guest_email  as string
-  const checkIn     = booking.check_in     as string
-  const checkOut    = booking.check_out    as string
-  const nights      = booking.nights       as number
+  const guestName   = booking.guest_name
+  const guestEmail  = booking.guest_email
+  const checkIn     = booking.check_in
+  const checkOut    = booking.check_out
+  const nights      = booking.nights
 
   const reason = source === "external"
     ? `Ces dates ont été réservées sur une plateforme partenaire (Airbnb / Booking.com) pendant le traitement de votre demande.`
