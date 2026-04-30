@@ -33,6 +33,9 @@ export default function PricingManager({ properties, initialRules }: Props) {
     : rules
 
   async function loadRules(dbId: string) {
+    setForm(EMPTY_FORM)
+    setEditingId(null)
+    setError("")
     const res = await fetch(`/api/admin/price-rules?property_id=${dbId}`)
     if (res.ok) {
       const data = await res.json()
