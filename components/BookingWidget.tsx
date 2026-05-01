@@ -180,32 +180,44 @@ export default function BookingWidget({ property, blockedDates = [], propertyDbI
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sticky top-28">
       {/* Prix + note */}
-      <div className="flex items-start justify-between mb-5">
-        <div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold text-[#4a4e69]">
-              {property.price_per_night_weekday}€
-            </span>
-            <span className="text-gray-400 text-sm">/ nuit</span>
-          </div>
-          {hasVariablePrice && (
-            <p className="text-xs text-gray-400 mt-0.5">
-              {property.price_per_night_weekend}€ ven–sam
-            </p>
-          )}
-        </div>
-        {property.rating && (
-          <div className="flex items-center gap-1 text-sm font-semibold text-[#4a4e69]">
-            <Star size={14} className="fill-[#d4af37] text-[#d4af37]" />
-            {property.rating.toFixed(1)}
-            {property.review_count && (
-              <span className="text-xs font-normal text-gray-400">
-                ({property.review_count})
-              </span>
+      {(() => {
+        const allPrices = [
+          property.price_per_night_weekday,
+          property.price_per_night_weekend,
+          ...priceRules.map((r) => r.price_weekday),
+          ...priceRules.map((r) => r.price_weekend),
+        ]
+        const minPrice = Math.min(...allPrices)
+        const hasRules = priceRules.length > 0
+        return (
+          <div className="flex items-start justify-between mb-5">
+            <div>
+              <div className="flex items-baseline gap-1">
+                {hasRules && <span className="text-sm text-gray-400 mr-0.5">À partir de</span>}
+                <span className="text-3xl font-bold text-[#4a4e69]">
+                  {hasRules ? minPrice : property.price_per_night_weekday}€
+                </span>
+                <span className="text-gray-400 text-sm">/ nuit</span>
+              </div>
+              {!hasRules && hasVariablePrice && (
+                <p className="text-xs text-gray-400 mt-0.5">{property.price_per_night_weekend}€ ven–sam</p>
+              )}
+              {hasRules && (
+                <p className="text-xs text-gray-400 mt-0.5">Voir les prix dans le calendrier</p>
+              )}
+            </div>
+            {property.rating && (
+              <div className="flex items-center gap-1 text-sm font-semibold text-[#4a4e69]">
+                <Star size={14} className="fill-[#d4af37] text-[#d4af37]" />
+                {property.rating.toFixed(1)}
+                {property.review_count && (
+                  <span className="text-xs font-normal text-gray-400">({property.review_count})</span>
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
+        )
+      })()}
 
       <form onSubmit={handleContinue} className="space-y-4">
         {/* Calendrier */}
