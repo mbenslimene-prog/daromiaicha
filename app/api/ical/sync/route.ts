@@ -7,9 +7,10 @@ import { fetchBlockedDates } from "@/lib/ical"
 // Cette route est appelée par un cron job (Vercel Cron ou appel externe)
 // ou manuellement depuis l'admin
 export async function POST(request: NextRequest) {
-  // Protection par token dédié (ADMIN_SECRET — ne jamais utiliser la service role key comme token HTTP)
+  // Vercel crons envoient CRON_SECRET ; appels manuels utilisent ADMIN_SECRET
   const auth = request.headers.get("authorization")
-  if (!process.env.ADMIN_SECRET || auth !== `Bearer ${process.env.ADMIN_SECRET}`) {
+  const validTokens = [process.env.ADMIN_SECRET, process.env.CRON_SECRET].filter(Boolean)
+  if (validTokens.length === 0 || !validTokens.some((t) => auth === `Bearer ${t}`)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
