@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import { eachDayOfInterval, parseISO } from "date-fns"
+import type { Metadata } from "next"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import BookingWidget from "@/components/BookingWidget"
@@ -12,6 +13,48 @@ import { Users, BedDouble, Bath, MapPin, CheckCircle, Maximize2, Star } from "lu
 
 export async function generateStaticParams() {
   return PROPERTIES.map((p) => ({ slug: p.slug }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const property = PROPERTIES.find((p) => p.slug === slug)
+  if (!property) return {}
+
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.com"
+  const url = `${base}/bien/${property.slug}`
+  const description = `Location ${property.title} à Kerkouane, Hammam Ghézez, Cap Bon, Tunisie. ${property.capacity_guests} voyageurs, ${property.capacity_bedrooms} chambres, 100m de la plage. À partir de ${property.price_per_night_weekday}€/nuit. Réservation directe en ligne.`
+
+  return {
+    title: property.title,
+    description,
+    keywords: `location ${property.title}, location Kerkouane, maison bord de mer Cap Bon, Hammam Ghézez, Dar Allouche, Kélibia, El Houaria, vacances Tunisie`,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${property.title} – Location Kerkouane, Cap Bon`,
+      description,
+      url,
+      type: "website",
+      locale: "fr_FR",
+      images: [
+        {
+          url: property.photos[0],
+          width: 1200,
+          height: 800,
+          alt: property.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${property.title} – Location Kerkouane`,
+      description,
+      images: [property.photos[0]],
+    },
+  }
 }
 
 interface PropertyDbData {
@@ -68,8 +111,48 @@ export default async function PropertyPage({
 
   const { dbId, blockedDates, priceRules } = await getPropertyDbData(property.slug)
 
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.com"
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    name: property.title,
+    description: property.description,
+    url: `${base}/bien/${property.slug}`,
+    image: property.photos[0],
+    priceRange: `À partir de ${property.price_per_night_weekday}€/nuit`,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Kerkouane, Hammam Ghézez",
+      addressLocality: "Kerkouane",
+      addressRegion: "Nabeul",
+      addressCountry: "TN",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 36.897,
+      longitude: 11.099,
+    },
+    ...(property.rating && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: property.rating,
+        reviewCount: property.review_count ?? 1,
+        bestRating: 5,
+      },
+    }),
+    amenityFeature: property.amenities.map((a) => ({
+      "@type": "LocationFeatureSpecification",
+      name: a,
+      value: true,
+    })),
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <div className="pt-20">
