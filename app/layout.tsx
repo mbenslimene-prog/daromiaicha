@@ -15,7 +15,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.mbstn.com"),
   title: {
     default: "Dar Omi Aicha | Location bord de mer – Kerkouane, Tunisie",
     template: "%s | Dar Omi Aicha – Kerkouane",

@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next"
 import { PROPERTIES } from "@/lib/properties"
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.com"
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.mbstn.com"
   return [
     {
       url: base,

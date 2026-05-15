@@ -24,7 +24,7 @@ export async function generateMetadata({
   const property = PROPERTIES.find((p) => p.slug === slug)
   if (!property) return {}
 
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.com"
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.mbstn.com"
   const url = `${base}/bien/${property.slug}`
   const description = `Location ${property.title} à Kerkouane, Hammam Ghézez, Cap Bon, Tunisie. ${property.capacity_guests} voyageurs, ${property.capacity_bedrooms} chambres, 100m de la plage. À partir de ${property.price_per_night_weekday}€/nuit. Réservation directe en ligne.`
 
@@ -111,7 +111,7 @@ export default async function PropertyPage({
 
   const { dbId, blockedDates, priceRules } = await getPropertyDbData(property.slug)
 
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.com"
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://daromiaicha.mbstn.com"
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LodgingBusiness",
