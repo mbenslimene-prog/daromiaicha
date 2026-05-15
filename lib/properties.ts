@@ -21,7 +21,7 @@ const PLAGES_AVOISINANTES = [
 ]
 
 const DESCRIPTION_COMMUNE =
-  "Bienvenue dans notre petite maison de bord de mer à Kerkouane, un coin secret et paisible de la côte tunisienne. Située à seulement 100 mètres de la plage, cette maison au style moderne et oriental est parfaite pour un séjour relaxant en couple, entre amis ou en famille. Cuisine excellemment équipée, salon lumineux, douche à l'italienne. À deux pas des ruines de Kerkouane (UNESCO), dans un quartier paisible. Confort, calme et dépaysement garantis."
+  "Bienvenue dans notre petite maison de bord de mer à Kerkouane, un coin secret et paisible de la côte tunisienne. Située à seulement 100 mètres de la plage, entre Hammam Ghézez et Dar Allouche, cette maison au style moderne et oriental est parfaite pour un séjour relaxant en couple, entre amis ou en famille. Cuisine excellemment équipée, salon lumineux, douche à l'italienne. À deux pas des ruines de Kerkouane (UNESCO), à 10 minutes de Kélibia et El Houaria, dans un quartier paisible. Confort, calme et dépaysement garantis."
 
 const AMENITIES_COMMUNES = [
   "Wi-Fi",

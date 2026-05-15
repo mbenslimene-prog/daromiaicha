@@ -25,12 +25,12 @@ const HIGHLIGHTS = [
   {
     icon: Waves,
     title: "Plages vierges",
-    text: "Des kilomètres de plage de sable blanc à Hammam Ghézez, eaux turquoise cristallines, loin du tourisme de masse.",
+    text: "Des kilomètres de plage de sable blanc entre Hammam Ghézez et Dar Allouche, eaux turquoise cristallines, loin du tourisme de masse.",
   },
   {
     icon: Sun,
     title: "Cap Bon authentique",
-    text: "Agrumes, oliviers, vignobles et villages de pêcheurs. La Tunisie authentique, à seulement 1h30 de Tunis.",
+    text: "Kélibia et son fort, les grottes d'El Houaria, vignobles et villages de pêcheurs. La Tunisie authentique, à seulement 1h30 de Tunis.",
   },
 ]
 

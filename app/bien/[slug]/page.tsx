@@ -218,9 +218,10 @@ export default async function PropertyPage({
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600 mb-10">
               {[
                 { emoji: "🏛️", label: "Site archéologique de Kerkouane (UNESCO)", dist: "5 km" },
-                { emoji: "🌊", label: "Grottes d'El Haouaria", dist: "10 km" },
                 { emoji: "🏖️", label: "Plage de Hammam Ghézez", dist: "5 km" },
+                { emoji: "🏖️", label: "Plage de Dar Allouche", dist: "8 km" },
                 { emoji: "🏰", label: "Fort de Kélibia", dist: "10 km" },
+                { emoji: "🌊", label: "Grottes d'El Houaria", dist: "15 km" },
                 { emoji: "🛍️", label: "Souk de Nabeul & médina d'Hammamet", dist: "60–70 km" },
                 { emoji: "💦", label: "Sources chaudes de Korbous", dist: "73 km" },
                 { emoji: "🏙️", label: "Tunis & Sidi Bou Saïd", dist: "120 km" },
